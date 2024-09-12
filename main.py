@@ -101,30 +101,6 @@ def package_lookup(hashTable, prompt):
           "Weight: " + str(package.package_mass) + "\n"
           "Status: " + str(package.delivery_status) + "\n")
 
-def find_nearest_package(hashTable, id):
-    current_package = hashTable.lookup(id)
-    current_package_id = current_package.id_number
-    current_address = current_package.delivery_address
-
-    next_address = None
-    next_address_distance = 50
-
-    for i in available_packages:
-        checking_id = hashTable.lookup(id)
-        checking_address = checking_id.delivery_address
-        if distance_between(current_address, checking_address) < next_address_distance:
-            next_address = checking_address
-            next_address_distance = distance_between(current_address, checking_address)
-
-    print("Current: ", current_address, current_package_id, "\n"
-          "Next Address: ", next_address, next_address_distance)
-
-
-def distance_table_loader():
-
-    with open('distances.csv') as distances:
-        reader = csv.reader(distances, delimiter = ',')
-
 
 def load_distance_data():
     with open('distances.csv') as csv_file:
@@ -148,6 +124,11 @@ def load_distance_data():
             #print(distance_data[src_address_index -1])
 
         return distance_data
+
+def distance_table_loader():
+
+    with open('distances.csv') as distances:
+        reader = csv.reader(distances, delimiter = ',')
 
 
 # Space-Time Complexity: O(N)
@@ -185,6 +166,11 @@ def get_num_addresses():
 
     return num_addresses
 
+def id_address_converter(hashTable, id):
+    address1 = hashTable.lookup(id).delivery_address
+
+    return address1
+
 
 # Space-Time Complexity: O(1)
 # Returns the distance between two addresses
@@ -196,38 +182,103 @@ def distance_between(address1, address2):
     address1_index = address_list.index(address1)
     address2_index = address_list.index(address2)
 
-    return distance_list[address1_index][address2_index]
+    return float(distance_list[address1_index][address2_index])
+
+def find_distance(hashTable, id1, id2):
+    current_address = hashTable.lookup(id1).delivery_address
+    checking_address = hashTable.lookup(id2).delivery_address
+
+    distance = float(distance_between(current_address, checking_address))
+    return distance
+
+def find_nearest_distance(hashTable, id):
+    current_package = hashTable.lookup(id)
+    current_package_id = current_package.id_number
+    current_address = current_package.delivery_address
+
+    next_address = None
+    next_address_distance = 50
+
+    for i in available_packages:
+        checking_id = hashTable.lookup(i)
+        checking_address = checking_id.delivery_address
+        if distance_between(current_address, checking_address) <= next_address_distance:
+            next_address = checking_address
+            next_address_distance = distance_between(current_address, checking_address)
+            next_address_id = checking_id.id_number
+    return float(next_address_distance)
+
+def find_nearest_package(hashTable, id):
+    current_package = hashTable.lookup(id)
+    current_package_id = current_package.id_number
+    current_address = current_package.delivery_address
+
+    next_address = None
+    next_address_distance = 50
+
+    for i in available_packages:
+        checking_id = hashTable.lookup(i)
+        checking_address = checking_id.delivery_address
+        if distance_between(current_address, checking_address) < next_address_distance:
+            next_address = checking_address
+            next_address_distance = distance_between(current_address, checking_address)
+            next_address_id = checking_id.id_number
+
+    return next_address_id
+
 
 # assigns and loads the packages onto the truck
 def fill_truck(hashTable, truck):
-
     if truck.get_id_number() == 1:
         for package in available_packages:
             if package in group2 or package in group3 or package in group4:
                 available_packages.remove(package)
 
-        print(len(available_packages))
+
         for i in range(len(priority1)):
             if priority1[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
-            truck.assigned_packages.add(priority1[i])
+            if priority1[i] not in truck.assigned_packages: truck.assigned_packages.append(priority1[i])
             if priority1[i] in available_packages: available_packages.remove(priority1[i])
 
 
-        truck.display_truck_info()
-        print(available_packages)
-        print(group1)
 
         if truck.get_capacity() >= len(group1):
-            print(available_packages)
             for i in range(len(group1)):
                 if group1[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
-                truck.assigned_packages.add(group1[i])
+                if group1[i] not in truck.assigned_packages: truck.assigned_packages.append(group1[i])
                 if group1[i] in available_packages: available_packages.remove(group1[i])
 
+        truck.display_truck_info()
+        
+        while truck.get_capacity() > 0:
+            shortest_distance = float('inf')
+            shortest_id = None
+            next_delivery_distance = float(50)
+            next_delivery_address = None
 
+            for i in truck.assigned_packages:
+                if truck.get_capacity() > 0:
+                    closest_address = find_nearest_distance(hashTable, i)
+                    if closest_address <= next_delivery_distance:
+                        next_delivery_distance = closest_address
+                        next_delivery_id = find_nearest_package(hashTable, i)
+                        next_delivery_address = id_address_converter(hashTable, next_delivery_id)
 
+            if next_delivery_distance < shortest_distance:
+                shortest_distance = next_delivery_distance
+                shortest_id = next_delivery_id
+                shortest_address = id_address_converter(hashTable, shortest_id)
+
+            truck.assigned_packages.append(shortest_id)
+            if shortest_id in available_packages:
+                available_packages.remove(shortest_id)
+            truck.capacity -= 1
 
         truck.display_truck_info()
+
+
+
+
 
 
     elif truck.get_id_number() == 2 and truck.get_capacity() >= len(group2):
@@ -235,13 +286,11 @@ def fill_truck(hashTable, truck):
               "Count: ", len(available_packages))
         for i in range(len(group2)):
             if group2[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
-            truck.assigned_packages.add(group2[i])
+            truck.assigned_packages.append(group2[i])
             if group2[i] in available_packages: available_packages.remove(group2[i])
-'''
+
         truck.display_truck_info()
-        print(len(available_packages))
-        print(available_packages)
-'''
+
 
 
 
@@ -280,11 +329,14 @@ def main():
 
     prepare_packages(delivery_table)
 
+    id_address_converter(delivery_table, 1)
+
     #package_lookup(delivery_table, input("\nCheck Package Info for [Package ID]:\n "))
     #print(undelivered_packages)
 
-
-    #find_nearest_package(delivery_table, 3)
+    find_nearest_package(delivery_table, 3)
+    find_nearest_distance(delivery_table, 3)
+    find_distance(delivery_table, 3, 2)
     print("\nTest complete!")
 
 

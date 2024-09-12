@@ -5,7 +5,7 @@ import HashTable
 class Truck:
     def __init__(self, id_number, driver):
         self.id_number = id_number
-        self.assigned_packages = set()
+        self.assigned_packages = []
         self.capacity = 16
         self.driver = driver
         self.speed = 18 # Miles per Hour
