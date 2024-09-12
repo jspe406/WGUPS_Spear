@@ -229,70 +229,73 @@ def find_nearest_package(hashTable, id):
 
 # assigns and loads the packages onto the truck
 def fill_truck(hashTable, truck):
+
+    # Truck 1
     if truck.get_id_number() == 1:
-        for package in available_packages:
+        package_list = available_packages.copy() # copy of package id's to work with
+
+        for package in package_list: # removes packages from available list
             if package in group2 or package in group3 or package in group4:
-                available_packages.remove(package)
+                package_list.remove(package)
 
-
-        for i in range(len(priority1)):
+        for i in range(len(priority1)): # adds priority 1 packages
             if priority1[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
             if priority1[i] not in truck.assigned_packages: truck.assigned_packages.append(priority1[i])
-            if priority1[i] in available_packages: available_packages.remove(priority1[i])
+            if priority1[i] in package_list: package_list.remove(priority1[i])
 
-
-
-        if truck.get_capacity() >= len(group1):
-            for i in range(len(group1)):
+        if truck.get_capacity() >= len(group1): # if there is room for all of group 1
+            for i in range(len(group1)): # add group 1 packages
                 if group1[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
                 if group1[i] not in truck.assigned_packages: truck.assigned_packages.append(group1[i])
-                if group1[i] in available_packages: available_packages.remove(group1[i])
+                if group1[i] in package_list: package_list.remove(group1[i])
 
-        truck.display_truck_info()
-        
-        while truck.get_capacity() > 0:
-            shortest_distance = float('inf')
-            shortest_id = None
-            next_delivery_distance = float(50)
-            next_delivery_address = None
+        # fill remaining spots on truck
+        truck_fill_remaining_spots(hashTable, truck1, package_list)
 
-            for i in truck.assigned_packages:
-                if truck.get_capacity() > 0:
-                    closest_address = find_nearest_distance(hashTable, i)
-                    if closest_address <= next_delivery_distance:
-                        next_delivery_distance = closest_address
-                        next_delivery_id = find_nearest_package(hashTable, i)
-                        next_delivery_address = id_address_converter(hashTable, next_delivery_id)
-
-            if next_delivery_distance < shortest_distance:
-                shortest_distance = next_delivery_distance
-                shortest_id = next_delivery_id
-                shortest_address = id_address_converter(hashTable, shortest_id)
-
-            truck.assigned_packages.append(shortest_id)
-            if shortest_id in available_packages:
-                available_packages.remove(shortest_id)
-            truck.capacity -= 1
-
-        truck.display_truck_info()
-
-
-
-
-
-
+    # Truck 2
     elif truck.get_id_number() == 2 and truck.get_capacity() >= len(group2):
-        print("Packages for Truck2: ",available_packages, "\n"
-              "Count: ", len(available_packages))
-        for i in range(len(group2)):
+        package_list = available_packages.copy() # creates an array of packages that can be filtered to use
+
+        for package in package_list: # removes packages already on truck 1
+            if package in truck1.assigned_packages:
+                package_list.remove(package)
+
+        for i in range(len(group2)): # filters out packages that can not be used
             if group2[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
             truck.assigned_packages.append(group2[i])
-            if group2[i] in available_packages: available_packages.remove(group2[i])
+            if group2[i] in package_list: package_list.remove(group2[i])
 
-        truck.display_truck_info()
+        #adds packages until truck is full. truck.display_truck_info()
+        truck_fill_remaining_spots(hashTable, truck2, package_list)
+ 
 
+def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through and finds closest packages
+    while truck.get_capacity() > 0: # stops when truck is full
+            next_distance = 10
+            next_package = None
+            for i in truck.assigned_packages: # all packages already in truck
+                closest_distance = 10
+                closest_package = None
+                for j in package_list: # undelivered available packages
+                
+                    distance = distance_between(id_address_converter(hashTable, i), id_address_converter(hashTable, j))
+                    package = j
+                    checking = i
 
-
+                    if distance < closest_distance:
+                        closest_distance = distance
+                        closest_package = package
+                if closest_distance < next_distance: 
+                    next_distance = closest_distance
+                    next_package = closest_package
+            
+            # adds package to truck and removes it from list
+            truck.assigned_packages.append(next_package)
+            package_list.remove(next_package)
+            truck.capacity = truck.capacity - 1
+            
+    truck.display_truck_info()
+    print("---------------------------------------------------------------\n")
 
 def prepare_packages(hashTable):
 
