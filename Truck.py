@@ -7,6 +7,7 @@ class Truck:
         self.id_number = id_number
         self.assigned_packages = []
         self.capacity = 16
+        self.hub_address = "4001 South 700 East"
         self.driver = driver
         self.speed = 18 # Miles per Hour
 

@@ -169,7 +169,7 @@ def get_num_addresses():
 def id_address_converter(hashTable, id):
     address1 = hashTable.lookup(id).delivery_address
 
-    return address1
+    return str(address1)
 
 
 # Space-Time Complexity: O(1)
@@ -294,8 +294,24 @@ def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through a
             package_list.remove(next_package)
             truck.capacity = truck.capacity - 1
             
-    truck.display_truck_info()
-    print("---------------------------------------------------------------\n")
+
+def sort_packages_on_truck(hashTable, truck):
+    sorted_list = truck.assigned_packages
+    starting_address = truck.hub_address
+    unsorted_list = truck.assigned_packages.copy()
+    next_package =  None
+    next_distance = 50
+
+    while len(unsorted_list) > 0:
+        for i in unsorted_list:
+            distance = distance_between(starting_address, id_address_converter(hashTable, i))
+            if distance < next_distance:
+                next_distance = distance
+                next_package = i 
+
+        print(next_package, next_distance)
+        unsorted_list.remove(i)
+        starting_address = id_address_converter(hashTable, i)
 
 def prepare_packages(hashTable):
 
@@ -306,6 +322,7 @@ def prepare_packages(hashTable):
     load_distance_data()
     fill_truck(hashTable, truck1)
     fill_truck(hashTable, truck2)
+    sort_packages_on_truck(hashTable, truck1)
 
 
 # def deliver_packages(hashTable):
@@ -324,6 +341,7 @@ def prompt_time():
     return report_datetime
 
 def main():
+
     print("Testing...")
 
     delivery_table = HashTable()
@@ -332,17 +350,9 @@ def main():
 
     prepare_packages(delivery_table)
 
-    id_address_converter(delivery_table, 1)
-
-    #package_lookup(delivery_table, input("\nCheck Package Info for [Package ID]:\n "))
-    #print(undelivered_packages)
-
-    find_nearest_package(delivery_table, 3)
-    find_nearest_distance(delivery_table, 3)
-    find_distance(delivery_table, 3, 2)
     print("\nTest complete!")
 
 
-    #test_nearest_package(delivery_table, 1)
+
 if __name__ == '__main__':
     main()
