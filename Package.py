@@ -15,6 +15,7 @@ class Package:
         self.package_group = 0
         self.package_priority = 0
         self.delivery_status = "At the Hub"
+        self.time_of_delivery = None
 
 
     def get_address(self):

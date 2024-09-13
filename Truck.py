@@ -1,5 +1,6 @@
 import Package
 import HashTable
+from datetime import timedelta
 
 
 class Truck:
@@ -10,6 +11,9 @@ class Truck:
         self.hub_address = "4001 South 700 East"
         self.driver = driver
         self.speed = 18 # Miles per Hour
+        self.mileage = 0
+        self.last_delivered = None
+        self.time = timedelta(hours = 8, minutes = 0, seconds = 0)
 
 # get functions
     def get_id_number(self):
@@ -26,6 +30,15 @@ class Truck:
 
     def get_assigned_packages(self):
         return self.assigned_packages
+    
+    def get_mileage(self):
+        return self.mileage
+    
+    def get_last_delivered(self):
+        return self.last_delivered
+    
+    def add_time(self, distance):
+        self.time += timedelta(minutes=(distance / self.speed * 60))
 
 # check to see if package is loaded onto truck
     def check_for_packages(self, package_id):

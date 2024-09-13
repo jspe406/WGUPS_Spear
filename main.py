@@ -324,7 +324,49 @@ def sort_packages_on_truck(hashTable, truck):
     truck.assigned_packages.clear()
     truck.assigned_packages = sorted_list
 
+
+def complete_route(hashTable, truck):
+    starting_address = truck.hub_address
+    current_address = starting_address
+
+    for i in truck.assigned_packages: # updates delivery status
+        package = hashTable.lookup(i)
+        package.delivery_status = "Out for Delivery"
         
+    for i in truck.assigned_packages.copy(): # adds mileage from point a to point b and removes package from list after delilvered
+        truck.mileage = round(truck.mileage + distance_between(current_address, id_address_converter(hashTable, i)),1)
+        print("Starting Address: ", current_address)
+        current_address = id_address_converter(hashTable, i)
+        package.delivery_status = "Delivered"
+        undelivered_packages.remove(id_address_converter(hashTable, i))
+        truck.assigned_packages.remove(i)
+        truck.capacity += 1
+        truck.last_delivered = i
+
+        print("Package: ", i, "\nStatus: ", package.delivery_status)
+        print("Next address: ", current_address)
+        print("Mileage: ",truck.mileage)
+        print("Last Delivery: ", truck.last_delivered)
+        print("-----------------------------------")
+
+def return_to_hub(hashTable, truck):
+        hub = truck.hub_address
+        last_delivery = id_address_converter(hashTable, truck.last_delivered)
+
+        truck.mileage = truck.mileage + distance_between(last_delivery, hub)   
+
+
+def assign_remaining_packages(hashTable, truck):
+    remaining = len(undelivered_packages.copy())
+    while remaining > 0:
+        for package in hashTable.package_table:
+            if package.delivery_status == "At the Hub":
+                truck.assigned_packages.append(package.id_number)
+                truck.capacity = truck.capacity - 1
+                remaining = remaining - 1
+    sort_packages_on_truck(hashTable, truck)
+    complete_route(hashTable, truck)
+
 
 def prepare_packages(hashTable):
 
@@ -340,10 +382,22 @@ def prepare_packages(hashTable):
     sort_packages_on_truck(hashTable, truck1)
     sort_packages_on_truck(hashTable, truck2)
 
-def deliver_packages():
-    test = 0
+def deliver_packages(hashTable):
 
-# def deliver_packages(hashTable):
+    complete_route(hashTable, truck1)
+    complete_route(hashTable, truck2)
+    
+    if undelivered_packages != None:
+        return_to_hub(hashTable, truck1)
+        assign_remaining_packages(hashTable, truck1)
+
+    if undelivered_packages != None:
+        return_to_hub(hashTable, truck2)
+        assign_remaining_packages(hashTable, truck2)
+
+    if len(undelivered_packages) == 0: print("All Packages Delivered!")
+    else: deliver_packages(hashTable)
+    
 
 def prompt_time():
     report_datetime = None
@@ -358,17 +412,21 @@ def prompt_time():
 
     return report_datetime
 
-def main():
+def main(): # functions calling other functions to maintain clean code
 
     print("Testing...")
 
-    delivery_table = HashTable()
+    delivery_table = HashTable() 
 
     package_table_loader(delivery_table)
 
     prepare_packages(delivery_table)
 
-    deliver_packages()
+    deliver_packages(delivery_table)
+
+    total_mileage = truck1.mileage + truck2.mileage
+
+    print("EOD MILEAGE: ", total_mileage)
 
     print("\nTest complete!")
 
