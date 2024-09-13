@@ -323,6 +323,8 @@ def sort_packages_on_truck(hashTable, truck):
         next_distance = 50
 
         for i in unsorted_list:
+            package = hashTable.lookup(i)
+            package.time_put_on_truck = truck.start_time 
             # finds closest distance from hub
             distance = distance_between(starting_address, id_address_converter(hashTable, i))
 
@@ -334,7 +336,8 @@ def sort_packages_on_truck(hashTable, truck):
         if next_package in unsorted_list:
             unsorted_list.remove(next_package)
         starting_address = id_address_converter(hashTable, next_package)
-        total_distance = round(total_distance + next_distance,1) 
+        total_distance = round(total_distance + next_distance,1)
+        
 
     # empties the list of packages on truck and copies over the sorted list
     truck.assigned_packages.clear()
@@ -449,8 +452,11 @@ def testing_lookup(hashTable, id):
     number = package.id_number
     status =  package.delivery_status
     time = package.time_of_delivery
+    start = package.time_put_on_truck
 
-    print(status, time)
+    print("start: ", start,
+          "status: ", status,
+          "delivered: ", time)
 
 
 
@@ -479,6 +485,7 @@ def main(): # functions calling other functions to maintain clean code
     total_mileage = truck1.mileage + truck2.mileage
     print("Total Miles: ", total_mileage)
 
+    testing_lookup(delivery_table, 1)
 
 if __name__ == '__main__':
     main()
