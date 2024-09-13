@@ -1,5 +1,4 @@
-# Joseph Spear
-# WGU Student ID: 011552587
+# Joseph Spear - WGU Student ID: 011552587
 
 import csv
 from datetime import datetime, timedelta
@@ -57,7 +56,7 @@ def package_table_loader(hashTable):
             undelivered_packages.append(package.delivery_address)
             available_packages.append(package.id_number)
 
-def set_package_group(hashTable):
+def set_package_group(hashTable): # package group is determined by the special notes
 
     for package in hashTable.package_table:
         if 'Must be delivered with' in package.special_notes \
@@ -77,7 +76,7 @@ def set_package_group(hashTable):
             group4.append(package.id_number)
         else: package.package_group = 5, group5.append(package.id_number)
 
-def set_package_priority(hashTable):
+def set_package_priority(hashTable): #  priority is determined by the delivery deadline
     for package in hashTable.package_table:
         if '9:00 AM' in package.delivery_deadline:
             package.package_priority = 1
@@ -87,7 +86,7 @@ def set_package_priority(hashTable):
             priority2.append(package.id_number)
         else: package.package_priority = 3, priority3.append(package.id_number)
 
-
+# Look up function to display all package information
 def package_lookup(hashTable, prompt):
     id_number = int(prompt)
     package = hashTable.lookup(id_number)
@@ -131,7 +130,7 @@ def distance_table_loader():
         reader = csv.reader(distances, delimiter = ',')
 
 
-# Space-Time Complexity: O(N)
+
 # Returns a list of address data parsed from the 'addresses.csv' file
 def load_address_data():
     # Open the 'addresses.csv' file
@@ -166,7 +165,9 @@ def get_num_addresses():
 
     return num_addresses
 
-def id_address_converter(hashTable, id):
+def id_address_converter(hashTable, id): # some functions use id number or the string address. 
+                                         # this is here to make it easier to use both or either
+                                         # it takes the id number and returns the address for the package
     address1 = hashTable.lookup(id).delivery_address
 
     return str(address1)
@@ -184,14 +185,14 @@ def distance_between(address1, address2):
 
     return float(distance_list[address1_index][address2_index])
 
-def find_distance(hashTable, id1, id2):
+def find_distance(hashTable, id1, id2): # distance_between function that uses id number instead as input... not necessary just more simple sometimes
     current_address = hashTable.lookup(id1).delivery_address
     checking_address = hashTable.lookup(id2).delivery_address
 
     distance = float(distance_between(current_address, checking_address))
     return distance
 
-def find_nearest_distance(hashTable, id):
+def find_nearest_distance(hashTable, id): # returns the distance to the nearest package
     current_package = hashTable.lookup(id)
     current_package_id = current_package.id_number
     current_address = current_package.delivery_address
@@ -208,7 +209,7 @@ def find_nearest_distance(hashTable, id):
             next_address_id = checking_id.id_number
     return float(next_address_distance)
 
-def find_nearest_package(hashTable, id):
+def find_nearest_package(hashTable, id): # returns the id number of the nearest package
     current_package = hashTable.lookup(id)
     current_package_id = current_package.id_number
     current_address = current_package.delivery_address
@@ -252,13 +253,13 @@ def fill_truck(hashTable, truck):
         # fill remaining spots on truck
         truck_fill_remaining_spots(hashTable, truck1, package_list)
 
+
     # Truck 2
     elif truck.get_id_number() == 2 and truck.get_capacity() >= len(group2):
-        package_list = available_packages.copy() # creates an array of packages that can be filtered to use
+        package_list = available_packages.copy()
 
-        for package in package_list: # removes packages already on truck 1
-            if package in truck1.assigned_packages:
-                package_list.remove(package)
+        for package in truck1.assigned_packages: # removes packages already on truck 1
+            package_list.remove(package)
 
         for i in range(len(group2)): # filters out packages that can not be used
             if group2[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
@@ -278,7 +279,7 @@ def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through a
                 closest_package = None
                 for j in package_list: # undelivered available packages
                 
-                    distance = distance_between(id_address_converter(hashTable, i), id_address_converter(hashTable, j))
+                    distance = find_distance(hashTable, i, j)
                     package = j
                     checking = i
 
@@ -296,22 +297,34 @@ def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through a
             
 
 def sort_packages_on_truck(hashTable, truck):
-    sorted_list = truck.assigned_packages
+    sorted_list = []
     starting_address = truck.hub_address
     unsorted_list = truck.assigned_packages.copy()
-    next_package =  None
-    next_distance = 50
+    total_distance = 0
 
     while len(unsorted_list) > 0:
+        next_package =  None
+        next_distance = 50
+
         for i in unsorted_list:
+            # finds closest distance from hub
             distance = distance_between(starting_address, id_address_converter(hashTable, i))
+
             if distance < next_distance:
                 next_distance = distance
-                next_package = i 
+                next_package = i
 
-        print(next_package, next_distance)
-        unsorted_list.remove(i)
-        starting_address = id_address_converter(hashTable, i)
+        sorted_list.append(next_package)
+        if next_package in unsorted_list:
+            unsorted_list.remove(next_package)
+        starting_address = id_address_converter(hashTable, next_package)
+        total_distance = round(total_distance + next_distance,1) 
+
+    # empties the list of packages on truck and copies over the sorted list
+    truck.assigned_packages.clear()
+    truck.assigned_packages = sorted_list
+
+        
 
 def prepare_packages(hashTable):
 
@@ -320,10 +333,15 @@ def prepare_packages(hashTable):
 
     load_address_data()
     load_distance_data()
+
     fill_truck(hashTable, truck1)
     fill_truck(hashTable, truck2)
-    sort_packages_on_truck(hashTable, truck1)
 
+    sort_packages_on_truck(hashTable, truck1)
+    sort_packages_on_truck(hashTable, truck2)
+
+def deliver_packages():
+    test = 0
 
 # def deliver_packages(hashTable):
 
@@ -349,6 +367,8 @@ def main():
     package_table_loader(delivery_table)
 
     prepare_packages(delivery_table)
+
+    deliver_packages()
 
     print("\nTest complete!")
 
