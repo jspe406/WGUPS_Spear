@@ -334,20 +334,25 @@ def complete_route(hashTable, truck):
         package.delivery_status = "Out for Delivery"
         
     for i in truck.assigned_packages.copy(): # adds mileage from point a to point b and removes package from list after delilvered
+        delivery_distance = distance_between(current_address, id_address_converter(hashTable, i)),1
         truck.mileage = round(truck.mileage + distance_between(current_address, id_address_converter(hashTable, i)),1)
         print("Starting Address: ", current_address)
         current_address = id_address_converter(hashTable, i)
         package.delivery_status = "Delivered"
+        package.time_of_delivery = truck.start_time + truck.calculate_time(truck.mileage)
         undelivered_packages.remove(id_address_converter(hashTable, i))
         truck.assigned_packages.remove(i)
         truck.capacity += 1
         truck.last_delivered = i
 
         print("Package: ", i, "\nStatus: ", package.delivery_status)
+        print("At: ", package.time_of_delivery)
         print("Next address: ", current_address)
         print("Mileage: ",truck.mileage)
         print("Last Delivery: ", truck.last_delivered)
         print("-----------------------------------")
+        print("Truck : ", truck.id_number)
+        print("Delivery Completed at ", package.time_of_delivery)
 
 def return_to_hub(hashTable, truck):
         hub = truck.hub_address
@@ -395,8 +400,6 @@ def deliver_packages(hashTable):
         return_to_hub(hashTable, truck2)
         assign_remaining_packages(hashTable, truck2)
 
-    if len(undelivered_packages) == 0: print("All Packages Delivered!")
-    else: deliver_packages(hashTable)
     
 
 def prompt_time():
@@ -421,6 +424,12 @@ def main(): # functions calling other functions to maintain clean code
     package_table_loader(delivery_table)
 
     prepare_packages(delivery_table)
+
+    truck1.start_time = timedelta(hours=8,minutes=30)
+    truck1.time = truck1.start_time
+
+    print("Start time: ", truck1.start_time)
+    print("\nTime of first Delivery: ", truck1.time)
 
     deliver_packages(delivery_table)
 

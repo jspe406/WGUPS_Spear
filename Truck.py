@@ -13,7 +13,8 @@ class Truck:
         self.speed = 18 # Miles per Hour
         self.mileage = 0
         self.last_delivered = None
-        self.time = timedelta(hours = 8, minutes = 0, seconds = 0)
+        self.start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
+        self.time = None
 
 # get functions
     def get_id_number(self):
@@ -37,8 +38,18 @@ class Truck:
     def get_last_delivered(self):
         return self.last_delivered
     
+    def get_start_time(self):
+        return self.start_time
+    
+    def get_time(self):
+        return self.time
+    
     def add_time(self, distance):
         self.time += timedelta(minutes=(distance / self.speed * 60))
+        return self.time
+
+    def calculate_time(self, distance):
+        return timedelta(minutes=(distance / self.speed * 60))
 
 # check to see if package is loaded onto truck
     def check_for_packages(self, package_id):
