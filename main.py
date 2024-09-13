@@ -23,6 +23,8 @@ priority3 = []
 truck1 = Truck(1,1)
 truck2 = Truck(2,2)
 
+total_mileage = truck1.mileage + truck2.mileage
+
 # Array to hold the packages ready to be delivered
 undelivered_packages = []
 
@@ -87,8 +89,8 @@ def set_package_priority(hashTable): #  priority is determined by the delivery d
         else: package.package_priority = 3, priority3.append(package.id_number)
 
 # Look up function to display all package information
-def package_lookup(hashTable, prompt):
-    id_number = int(prompt)
+def package_lookup(hashTable, id):
+    id_number = int(id)
     package = hashTable.lookup(id_number)
 
     print("Package Info: \n"
@@ -98,7 +100,19 @@ def package_lookup(hashTable, prompt):
           "City: " + str(package.delivery_city) + "\n"
           "Zip: " + str(package.delivery_zip) + "\n"
           "Weight: " + str(package.package_mass) + "\n"
-          "Status: " + str(package.delivery_status) + "\n")
+          "Status: " + str(package.delivery_status) + "\n"
+          "Delivery Time: ", package.time_of_delivery, "\n")
+    
+def update_address(hashTable, id):
+    self = hashTable.lookup(id)
+    self.delivery_address = '410 S State St'
+    self.delivery_city = 'Salt Lake City'
+    self.delivery_state = 'UT'
+    self.delivery_zip = '84111'
+
+def get_address(hashTalbe, id):
+    package = hashTalbe.lookup(id)
+    return package.delivery_address
 
 
 def load_distance_data():
@@ -261,14 +275,17 @@ def fill_truck(hashTable, truck):
         for package in truck1.assigned_packages: # removes packages already on truck 1
             package_list.remove(package)
 
-        for i in range(len(group2)): # filters out packages that can not be used
+        for package in package_list:
+            if package == 9:
+                package_list.remove(package)
+
+        for i in range(len(group2)): # adds group 2 packages to truck
             if group2[i] not in truck.assigned_packages: truck.capacity = truck.capacity - 1
             truck.assigned_packages.append(group2[i])
             if group2[i] in package_list: package_list.remove(group2[i])
 
         #adds packages until truck is full. truck.display_truck_info()
         truck_fill_remaining_spots(hashTable, truck2, package_list)
- 
 
 def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through and finds closest packages
     while truck.get_capacity() > 0: # stops when truck is full
@@ -293,8 +310,7 @@ def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through a
             # adds package to truck and removes it from list
             truck.assigned_packages.append(next_package)
             package_list.remove(next_package)
-            truck.capacity = truck.capacity - 1
-            
+            truck.capacity = truck.capacity - 1            
 
 def sort_packages_on_truck(hashTable, truck):
     sorted_list = []
@@ -328,37 +344,45 @@ def sort_packages_on_truck(hashTable, truck):
 def complete_route(hashTable, truck):
     starting_address = truck.hub_address
     current_address = starting_address
+    
 
     for i in truck.assigned_packages: # updates delivery status
         package = hashTable.lookup(i)
         package.delivery_status = "Out for Delivery"
         
     for i in truck.assigned_packages.copy(): # adds mileage from point a to point b and removes package from list after delilvered
-        delivery_distance = distance_between(current_address, id_address_converter(hashTable, i)),1
+        package = hashTable.lookup(i)
+
         truck.mileage = round(truck.mileage + distance_between(current_address, id_address_converter(hashTable, i)),1)
-        print("Starting Address: ", current_address)
         current_address = id_address_converter(hashTable, i)
+
         package.delivery_status = "Delivered"
         package.time_of_delivery = truck.start_time + truck.calculate_time(truck.mileage)
-        undelivered_packages.remove(id_address_converter(hashTable, i))
+
+        if id_address_converter(hashTable, i) in undelivered_packages: undelivered_packages.remove(id_address_converter(hashTable, i))
         truck.assigned_packages.remove(i)
         truck.capacity += 1
         truck.last_delivered = i
 
+'''
         print("Package: ", i, "\nStatus: ", package.delivery_status)
         print("At: ", package.time_of_delivery)
         print("Next address: ", current_address)
         print("Mileage: ",truck.mileage)
         print("Last Delivery: ", truck.last_delivered)
-        print("-----------------------------------")
+        
         print("Truck : ", truck.id_number)
         print("Delivery Completed at ", package.time_of_delivery)
+        print("-----------------------------------")
+'''
 
 def return_to_hub(hashTable, truck):
         hub = truck.hub_address
         last_delivery = id_address_converter(hashTable, truck.last_delivered)
 
-        truck.mileage = truck.mileage + distance_between(last_delivery, hub)   
+        truck.mileage = truck.mileage + distance_between(last_delivery, hub)
+
+        truck.time = truck.start_time + truck.calculate_time(truck.mileage)
 
 
 def assign_remaining_packages(hashTable, truck):
@@ -370,7 +394,6 @@ def assign_remaining_packages(hashTable, truck):
                 truck.capacity = truck.capacity - 1
                 remaining = remaining - 1
     sort_packages_on_truck(hashTable, truck)
-    complete_route(hashTable, truck)
 
 
 def prepare_packages(hashTable):
@@ -392,13 +415,11 @@ def deliver_packages(hashTable):
     complete_route(hashTable, truck1)
     complete_route(hashTable, truck2)
     
-    if undelivered_packages != None:
-        return_to_hub(hashTable, truck1)
-        assign_remaining_packages(hashTable, truck1)
-
-    if undelivered_packages != None:
-        return_to_hub(hashTable, truck2)
-        assign_remaining_packages(hashTable, truck2)
+    
+    return_to_hub(hashTable, truck1)
+    update_address(hashTable, 9) # truck 1 arrives back to hub at 10:37 so we can now update the address for package 9
+    assign_remaining_packages(hashTable, truck1)
+    complete_route(hashTable, truck1)
 
     
 
@@ -415,30 +436,48 @@ def prompt_time():
 
     return report_datetime
 
+def test(hashTable):
+    report_datetime = prompt_time()
+    test = datetime.now().replace(hour=10,minute=19)
+    if report_datetime.time() > test.time():
+        update_address(hashTable, 9)
+        print("Address updated")
+    else: print("Too soon to update address")
+
+def testing_lookup(hashTable, id):
+    package = hashTable.lookup(id)
+    number = package.id_number
+    status =  package.delivery_status
+    time = package.time_of_delivery
+
+    print(status, time)
+
+
+
 def main(): # functions calling other functions to maintain clean code
 
     print("Testing...")
 
     delivery_table = HashTable() 
-
+    
     package_table_loader(delivery_table)
 
     prepare_packages(delivery_table)
 
-    truck1.start_time = timedelta(hours=8,minutes=30)
-    truck1.time = truck1.start_time
+    #test(delivery_table)
 
-    print("Start time: ", truck1.start_time)
-    print("\nTime of first Delivery: ", truck1.time)
+
+    truck1.start_time = timedelta(hours=8,minutes=0)
+    truck1.time = truck1.start_time
+    truck2.start_time = timedelta(hours=9,minutes=5)
+    truck2.time = truck2.start_time
 
     deliver_packages(delivery_table)
 
-    total_mileage = truck1.mileage + truck2.mileage
-
-    print("EOD MILEAGE: ", total_mileage)
 
     print("\nTest complete!")
-
+    total_mileage = truck1.mileage + truck2.mileage
+    print("Total Miles: ", total_mileage)
 
 
 if __name__ == '__main__':
