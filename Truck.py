@@ -66,19 +66,20 @@ class Truck:
               "Driver Assigned to truck: ", truck.driver)
 
     def time_to_mileage(self, time):
-        start_time = None
-        if time > self.start_time:
-            print("all deliveries completed at: ", self.last_time)
-            time = self.last_time
-        if self.id_number == 1:
-            start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
-        elif self.id_number == 2:
-            start_time = timedelta(hours = 9, minutes = 5, seconds = 0)
+        if time < self.start_time:
+            print("time given is before the first delivery. Mileage is = 0")
 
-        start_time = datetime.strptime(str(start_time), "%H:%M:%S")
-        print("total time: ", (time - start_time))
+            mileage = 0
 
-        mileage = round(((time - start_time).total_seconds() / 3600 * self.speed),1)
+        elif time > self.start_time:
+            if time > self.last_time: time = self.last_time
+            if self.id_number == 1:
+                start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
+                start_time = datetime.strptime(str(start_time), "%H:%M:%S")
+                mileage = round(((time - start_time).total_seconds() / 3600 * self.speed), 1)
+            if self.id_number == 2:
+                start_time = timedelta(hours = 9, minutes = 5, seconds = 0)
+                start_time = datetime.strptime(str(start_time), "%H:%M:%S")
+                mileage = round(((time - start_time).total_seconds() / 3600 * self.speed), 1)
 
-        print("mileage: ", mileage)
         return mileage
