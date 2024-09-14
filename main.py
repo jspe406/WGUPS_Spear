@@ -22,6 +22,7 @@ priority3 = []
 # Initalize trucks for delivery
 truck1 = Truck(1,1)
 truck2 = Truck(2,2)
+truck_list = [truck1.id_number, truck2.id_number]
 
 total_mileage = truck1.mileage + truck2.mileage
 
@@ -367,8 +368,9 @@ def complete_route(hashTable, truck):
         truck.capacity += 1
         truck.last_delivered = i
 
-'''
+
         print("Package: ", i, "\nStatus: ", package.delivery_status)
+        print("Start Time: ", package.time_put_on_truck)
         print("At: ", package.time_of_delivery)
         print("Next address: ", current_address)
         print("Mileage: ",truck.mileage)
@@ -377,7 +379,7 @@ def complete_route(hashTable, truck):
         print("Truck : ", truck.id_number)
         print("Delivery Completed at ", package.time_of_delivery)
         print("-----------------------------------")
-'''
+
 
 def return_to_hub(hashTable, truck):
         hub = truck.hub_address
@@ -386,6 +388,7 @@ def return_to_hub(hashTable, truck):
         truck.mileage = truck.mileage + distance_between(last_delivery, hub)
 
         truck.time = truck.start_time + truck.calculate_time(truck.mileage)
+        truck.start_time = truck.time
 
 
 def assign_remaining_packages(hashTable, truck):
@@ -422,6 +425,8 @@ def deliver_packages(hashTable):
     return_to_hub(hashTable, truck1)
     update_address(hashTable, 9) # truck 1 arrives back to hub at 10:37 so we can now update the address for package 9
     assign_remaining_packages(hashTable, truck1)
+
+    print("truck1 second start time: ", truck1.start_time)
     complete_route(hashTable, truck1)
 
     
@@ -439,13 +444,13 @@ def prompt_time():
 
     return report_datetime
 
-def test(hashTable):
+def test_package(hashTable, id):
     report_datetime = prompt_time()
-    test = datetime.now().replace(hour=10,minute=19)
-    if report_datetime.time() > test.time():
-        update_address(hashTable, 9)
-        print("Address updated")
-    else: print("Too soon to update address")
+    parsed = hashTable.package_table[id].time_put_on_truck
+
+    if report_datetime.time() > parsed:
+        print("Out for delivery or delivered")
+    else: print("At the Hub")
 
 def testing_lookup(hashTable, id):
     package = hashTable.lookup(id)
@@ -458,34 +463,51 @@ def testing_lookup(hashTable, id):
           "status: ", status,
           "delivered: ", time)
 
+def prepare_trucks():
+    truck2.start_time = timedelta(hours=9, minutes=5)  # Truck 2 start time
+    truck2.time = truck2.start_time
+    truck1.start_time = timedelta(hours=8, minutes=0)
+    truck1.time = truck1.start_time
+
+def transform_time_data(hashTable):
+    for package in hashTable.package_table:
+        time = str(package.time_put_on_truck)
+        parsed_time = datetime.strptime(time, "%H:%M:%S").time()
+        package.time_put_on_truck = parsed_time
+
 
 
 def main(): # functions calling other functions to maintain clean code
 
     print("Testing...")
 
+
     delivery_table = HashTable() 
     
     package_table_loader(delivery_table)
+
+    prepare_trucks()
 
     prepare_packages(delivery_table)
 
     #test(delivery_table)
 
 
-    truck1.start_time = timedelta(hours=8,minutes=0)
-    truck1.time = truck1.start_time
-    truck2.start_time = timedelta(hours=9,minutes=5)
-    truck2.time = truck2.start_time
-
     deliver_packages(delivery_table)
 
+    transform_time_data(delivery_table)
+
+    print(delivery_table.package_table[9].delivery_status)
+
+    test_package(delivery_table, 9)
 
     print("\nTest complete!")
     total_mileage = truck1.mileage + truck2.mileage
     print("Total Miles: ", total_mileage)
+    print(truck2.start_time)
+    print(truck1.start_time)
 
-    testing_lookup(delivery_table, 1)
+    #testing_lookup(delivery_table, 1)
 
 if __name__ == '__main__':
     main()
