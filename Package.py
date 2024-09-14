@@ -24,4 +24,12 @@ class Package:
 
     def get_status(self):
         return self.delivery_status
+
+    def is_on_truck(self, time):
+        if time.time() > self.time_put_on_truck and time < self.time_of_delivery:
+            return True
+
+    def is_delivered(self, time):
+        if time.time() >  self.time_of_delivery:
+            return True
     

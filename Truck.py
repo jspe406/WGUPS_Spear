@@ -1,7 +1,7 @@
 import Package
 import HashTable
 from datetime import timedelta
-
+from datetime import datetime, timedelta
 
 class Truck:
     def __init__(self, id_number, driver):
@@ -15,6 +15,7 @@ class Truck:
         self.last_delivered = None
         self.start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
         self.time = None
+        self.last_time = None
 
 # get functions
     def get_id_number(self):
@@ -63,3 +64,21 @@ class Truck:
               "Assigned [%d] Packages: " % len(truck.assigned_packages),truck.assigned_packages, "\n"
               "Available Slots on Truck: ", truck.capacity, "\n"
               "Driver Assigned to truck: ", truck.driver)
+
+    def time_to_mileage(self, time):
+        start_time = None
+        if time > self.start_time:
+            print("all deliveries completed at: ", self.last_time)
+            time = self.last_time
+        if self.id_number == 1:
+            start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
+        elif self.id_number == 2:
+            start_time = timedelta(hours = 9, minutes = 5, seconds = 0)
+
+        start_time = datetime.strptime(str(start_time), "%H:%M:%S")
+        print("total time: ", (time - start_time))
+
+        mileage = round(((time - start_time).total_seconds() / 3600 * self.speed),1)
+
+        print("mileage: ", mileage)
+        return mileage

@@ -362,6 +362,8 @@ def complete_route(hashTable, truck):
 
         package.delivery_status = "Delivered"
         package.time_of_delivery = truck.start_time + truck.calculate_time(truck.mileage)
+        truck.last_time = package.time_of_delivery
+        truck.last_time = datetime.strptime(str(truck.last_time), '%H:%M:%S')
 
         if id_address_converter(hashTable, i) in undelivered_packages: undelivered_packages.remove(id_address_converter(hashTable, i))
         truck.assigned_packages.remove(i)
@@ -446,9 +448,9 @@ def prompt_time():
 
 def test_package(hashTable, id):
     report_datetime = prompt_time()
-    parsed = hashTable.package_table[id].time_put_on_truck
+    time = hashTable.package_table[id].time_put_on_truck
 
-    if report_datetime.time() > parsed:
+    if report_datetime.time() > time:
         print("Out for delivery or delivered")
     else: print("At the Hub")
 
@@ -475,6 +477,18 @@ def transform_time_data(hashTable):
         parsed_time = datetime.strptime(time, "%H:%M:%S").time()
         package.time_put_on_truck = parsed_time
 
+        time = str(package.time_of_delivery)
+        parsed_time = datetime.strptime(time, "%H:%M:%S").time()
+        package.time_of_delivery = parsed_time
+def transform_truck_times():
+    # truck 1 start time
+    time = str(truck1.start_time)
+    parsed_time = datetime.strptime(time, "%H:%M:%S")
+    truck1.start_time = parsed_time
+    # truck 2 start time
+    time = str(truck2.start_time)
+    parsed_time = datetime.strptime(time, "%H:%M:%S")
+    truck2.start_time = parsed_time
 
 
 def main(): # functions calling other functions to maintain clean code
@@ -496,16 +510,24 @@ def main(): # functions calling other functions to maintain clean code
     deliver_packages(delivery_table)
 
     transform_time_data(delivery_table)
+    transform_truck_times()
 
     print(delivery_table.package_table[9].delivery_status)
 
-    test_package(delivery_table, 9)
-
-    print("\nTest complete!")
+    #test_package(delivery_table, 9)
+    print(truck1.mileage, truck2.mileage)
     total_mileage = truck1.mileage + truck2.mileage
     print("Total Miles: ", total_mileage)
     print(truck2.start_time)
     print(truck1.start_time)
+
+    '''
+    print("test:")
+    eod1 = truck1.time_to_mileage(prompt_time())
+    eod2 = truck2.time_to_mileage(prompt_time())
+    print("testing eod mileage: ", (eod1 + eod2))
+    '''
+    print("\nTest complete!")
 
     #testing_lookup(delivery_table, 1)
 
