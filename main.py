@@ -348,7 +348,7 @@ def sort_packages_on_truck(hashTable, truck):
 def complete_route(hashTable, truck):
     starting_address = truck.hub_address
     current_address = starting_address
-    
+    trip_mileage = 0
 
     for i in truck.assigned_packages: # updates delivery status
         package = hashTable.lookup(i)
@@ -358,10 +358,16 @@ def complete_route(hashTable, truck):
         package = hashTable.lookup(i)
 
         truck.mileage = round(truck.mileage + distance_between(current_address, id_address_converter(hashTable, i)),1)
+        trip_mileage = round(trip_mileage + distance_between(current_address, id_address_converter(hashTable, i)),1)
         current_address = id_address_converter(hashTable, i)
 
         package.delivery_status = "Delivered"
-        package.time_of_delivery = truck.start_time + truck.calculate_time(truck.mileage)
+        if truck.start_time == timedelta(hours = 10, minutes = 7, seconds = 20):
+            if truck.assigned_packages == [0]: current_address = truck.hub_address
+            print("TRIP MILEAGE: ", trip_mileage)
+            package.time_of_delivery = truck.start_time + truck.calculate_time(trip_mileage)
+        else:
+            package.time_of_delivery = truck.start_time + truck.calculate_time(truck.mileage)
         truck.last_time = package.time_of_delivery
         truck.last_time = datetime.strptime(str(truck.last_time), '%H:%M:%S')
 
@@ -521,12 +527,12 @@ def main(): # functions calling other functions to maintain clean code
     print(truck2.start_time)
     print(truck1.start_time)
 
-    '''
+
     print("test:")
     eod1 = truck1.time_to_mileage(prompt_time())
     eod2 = truck2.time_to_mileage(prompt_time())
     print("testing eod mileage: ", (eod1 + eod2))
-    '''
+
     print("\nTest complete!")
 
     #testing_lookup(delivery_table, 1)
