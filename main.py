@@ -364,7 +364,6 @@ def complete_route(hashTable, truck):
         package.delivery_status = "Delivered"
         if truck.start_time == timedelta(hours = 10, minutes = 7, seconds = 20):
             if truck.assigned_packages == [0]: current_address = truck.hub_address
-            print("TRIP MILEAGE: ", trip_mileage)
             package.time_of_delivery = truck.start_time + truck.calculate_time(trip_mileage)
         else:
             package.time_of_delivery = truck.start_time + truck.calculate_time(truck.mileage)
@@ -376,7 +375,7 @@ def complete_route(hashTable, truck):
         truck.capacity += 1
         truck.last_delivered = i
 
-
+'''
         print("Package: ", i, "\nStatus: ", package.delivery_status)
         print("Start Time: ", package.time_put_on_truck)
         print("At: ", package.time_of_delivery)
@@ -387,7 +386,7 @@ def complete_route(hashTable, truck):
         print("Truck : ", truck.id_number)
         print("Delivery Completed at ", package.time_of_delivery)
         print("-----------------------------------")
-
+'''
 
 def return_to_hub(hashTable, truck):
         hub = truck.hub_address
@@ -434,14 +433,12 @@ def deliver_packages(hashTable):
     update_address(hashTable, 9) # truck 1 arrives back to hub at 10:37 so we can now update the address for package 9
     assign_remaining_packages(hashTable, truck1)
 
-    print("truck1 second start time: ", truck1.start_time)
     complete_route(hashTable, truck1)
 
     
 
 def prompt_time():
     report_datetime = None
-
     # Prompt the user for a specified time
     while report_datetime is None:
         try:
@@ -460,16 +457,88 @@ def test_package(hashTable, id):
         print("Out for delivery or delivered")
     else: print("At the Hub")
 
-def testing_lookup(hashTable, id):
-    package = hashTable.lookup(id)
-    number = package.id_number
-    status =  package.delivery_status
-    time = package.time_of_delivery
-    start = package.time_put_on_truck
+def lookup_individual(hashTable):
 
-    print("start: ", start,
-          "status: ", status,
-          "delivered: ", time)
+    while True: # ensures that input form user is within the range of vaild ID numbers
+        try:
+            id = int(input("Please type the ID number of the package you would like to check (0-39): "))
+            if 0 <= id <= 39:
+                break
+            else:
+                print("Invalid input. Please enter a number between 1 and 40.")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+
+    time = prompt_time()
+    parsed_time = time.time()
+    package = hashTable.package_table[id]
+    status =  package.delivery_status
+    start = package.time_put_on_truck
+    delivery_time = package.time_of_delivery
+
+    mileage1 = truck1.time_to_mileage(time)
+    mileage2 = truck2.time_to_mileage(time)
+    total_mileage = mileage1 + mileage2
+
+    if parsed_time < start:
+        status = "At the Hub"
+    if parsed_time > start and parsed_time < delivery_time:
+        status = 'En Route'
+    elif parsed_time > delivery_time:
+        status = 'Delivered'
+    delivery_time = datetime.strptime(str(delivery_time), "%H:%M:%S")
+    delivery_time = datetime.strftime(delivery_time, "%I:%M %p")
+
+    message = "\nPackage: " + str(id) + " | " + "Status: " + status + " | "
+    if status == "Delivered":
+        message += "Time of Delivery: " + str(delivery_time) + " | "
+    message += "Mileage of Truck 1: " + str(mileage1) + " | "
+    message += "Mileage of Truck 2: " + str(mileage2) + " | "
+    message += "Mileage of both Trucks: " + str(total_mileage) + " | "
+    print(message)
+    input("Press 'ENTER' to continue")
+    prompt_interactive_menu(hashTable, truck_list)
+
+def display_all_packages(hashTable):
+    time = prompt_time()
+    parsed_time = time.time()
+    check_time = datetime.strftime(time, "%I:%M %p")
+
+    for i in range(1,40):
+        package = hashTable.package_table[i]
+        if parsed_time < package.time_put_on_truck:
+            status = "At the Hub"
+        if parsed_time > package.time_put_on_truck and parsed_time < package.time_of_delivery:
+            status = 'En Route'
+        elif parsed_time > package.time_of_delivery:
+            status = 'Delivered'
+
+        package_info = "Package: " + str(package.id_number) + " | "
+        package_info += "Status: " + str(status) + " | "
+        if status == "Delivered":
+            package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
+        print(package_info)
+
+    package = hashTable.package_table[0] # package at index 0 is ID 40. I didn't like it printing out starting with ID 40. so I removed it from the loop
+    if parsed_time < package.time_put_on_truck:
+        status = "At the Hub"
+    if parsed_time > package.time_put_on_truck and parsed_time < package.time_of_delivery:
+        status = 'En Route'
+    elif parsed_time > package.time_of_delivery:
+        status = 'Delivered'
+
+    package_info = "Package: " + str(package.id_number) + " | "
+    package_info += "Status: " + str(status) + " | "
+    if status == "Delivered":
+        package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
+    print(package_info)
+
+    print("Total Miles", (truck1.time_to_mileage(time) + truck2.time_to_mileage(time)))
+    print("Checked at: ", check_time)
+
+    input("Press 'ENTER' to continue")
+    prompt_interactive_menu(hashTable, truck_list)
+
 
 def prepare_trucks():
     truck2.start_time = timedelta(hours=9, minutes=5)  # Truck 2 start time
@@ -486,6 +555,7 @@ def transform_time_data(hashTable):
         time = str(package.time_of_delivery)
         parsed_time = datetime.strptime(time, "%H:%M:%S").time()
         package.time_of_delivery = parsed_time
+
 def transform_truck_times():
     # truck 1 start time
     time = str(truck1.start_time)
@@ -496,11 +566,40 @@ def transform_truck_times():
     parsed_time = datetime.strptime(time, "%H:%M:%S")
     truck2.start_time = parsed_time
 
+def prompt_interactive_menu(hashTable, truck_list):
+    # Display the title of the application
+    print("===========================================")
+    print("Western Governors University Parcel Service")
+    print("===========================================")
+
+    # Display menu options
+    print("Please select a menu option to generate a report or retrieve package information.\n")
+    print("\t 1. General Report")
+    print("\t 2. Package Query")
+    print("\t 3. Exit")
+    valid_options = [1, 2, 3]
+
+    # Prompt the user for option selection:
+    option = None
+
+    while option is None:
+        user_input = input("\nEnter your option selection here: ")
+
+        if user_input.isdigit() and int(user_input) in valid_options:
+            option = int(user_input)
+        else:
+            print("Error: Invalid option provided.")
+
+    # Process the option selected by the end-user:
+    if option == 1: display_all_packages(hashTable)
+    if option == 2: lookup_individual(hashTable)
+    if option == 3:
+        print("\nThank You. Program will now self-destruct.")
+        quit()
 
 def main(): # functions calling other functions to maintain clean code
 
-    print("Testing...")
-
+    print("Program Started...\n")
 
     delivery_table = HashTable() 
     
@@ -510,32 +609,12 @@ def main(): # functions calling other functions to maintain clean code
 
     prepare_packages(delivery_table)
 
-    #test(delivery_table)
-
-
     deliver_packages(delivery_table)
 
     transform_time_data(delivery_table)
     transform_truck_times()
 
-    print(delivery_table.package_table[9].delivery_status)
-
-    #test_package(delivery_table, 9)
-    print(truck1.mileage, truck2.mileage)
-    total_mileage = truck1.mileage + truck2.mileage
-    print("Total Miles: ", total_mileage)
-    print(truck2.start_time)
-    print(truck1.start_time)
-
-
-    print("test:")
-    eod1 = truck1.time_to_mileage(prompt_time())
-    eod2 = truck2.time_to_mileage(prompt_time())
-    print("testing eod mileage: ", (eod1 + eod2))
-
-    print("\nTest complete!")
-
-    #testing_lookup(delivery_table, 1)
+    prompt_interactive_menu(delivery_table, truck_list)
 
 if __name__ == '__main__':
     main()

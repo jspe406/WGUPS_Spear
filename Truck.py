@@ -16,6 +16,7 @@ class Truck:
         self.start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
         self.time = None
         self.last_time = None
+        self.second_start = timedelta(hours = 10, minutes = 7, seconds = 20)
 
 # get functions
     def get_id_number(self):
@@ -66,12 +67,12 @@ class Truck:
               "Driver Assigned to truck: ", truck.driver)
 
     def time_to_mileage(self, time):
-        if time < self.start_time:
-            print("time given is before the first delivery. Mileage is = 0")
-
+        if self.id_number == 1 and time < datetime.strptime(str(timedelta(hours=8, minutes=0, seconds=0)), "%H:%M:%S"):
             mileage = 0
 
-        elif time > self.start_time:
+        elif self.id_number == 2 and time < self.start_time:
+            mileage = 0
+        else:
             if time > self.last_time: time = self.last_time
             if self.id_number == 1:
                 start_time = timedelta(hours = 8, minutes = 0, seconds = 0)
