@@ -25,7 +25,13 @@ The supervisor should be able to see, at assigned points, the progress of each t
 ### A. Develop a hash table, without using any additional libraries or classes, that has an insertion function that takes the package ID as input and inserts each of the following data components into the hash table
 
 ### B.  Develop a look-up function that takes the package ID as input and returns each of the following corresponding data components:
-![Screenshot 2024-09-14 224532.png](screenshots%2FScreenshot%202024-09-14%20224532.png)
+
+<br>
+<center>
+<img src="screenshots/Screenshot 2024-09-14 224532.png" style="width:75%">
+</center>
+<br>
+
 ### C.  Write an original program that will deliver all packages and meet all requirements using the attached supporting documents “Salt Lake City Downtown Map,” “WGUPS Distance Table,” and “WGUPS Package File.”
 
 <br>
@@ -64,7 +70,13 @@ The supervisor should be able to see, at assigned points, the progress of each t
 ***
 
 ### E.  Provide screenshots showing successful completion of the code that includes the total mileage traveled by all trucks.
-![Screenshot 2024-09-14 224924.png](screenshots%2FScreenshot%202024-09-14%20224924.png)
+
+<br>
+<center>
+<img src="screenshots/Screenshot 2024-09-14 224924.png" style="width:50%">
+</center>
+<br>
+
 ### F.  Justify the package delivery algorithm used in the solution as written in the original program by doing the following:
 1.  Describe two or more strengths of the algorithm used in the solution.
 ```
