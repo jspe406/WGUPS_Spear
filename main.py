@@ -59,6 +59,17 @@ def package_table_loader(hashTable):
             undelivered_packages.append(package.delivery_address)
             available_packages.append(package.id_number)
 
+def package_lookup(hashTable, id): # look up function for requirement B
+    package = hashTable.package_table[id]
+
+    print("Delivery Address: ", package.delivery_address, "\n"
+          "Delivery Deadline: ", package.delivery_deadline, "\n"
+          "City: ", package.city, "\n"
+          "Zip Code: ", package.zip_code, "\n"
+          "Weight (kg): ", package.weight, "\n"
+          "Status: " + package.delivery_status, "\n"
+          "Delivery Time: ", package.time_of_delivery, "\n")
+
 def set_package_group(hashTable): # package group is determined by the special notes
 
     for package in hashTable.package_table:
@@ -463,6 +474,7 @@ def lookup_individual(hashTable):  # function to display data for any given pack
     message = "\nPackage: " + str(id) + " | " + "Status: " + status + " | "
     if status == "Delivered":
         message += "Time of Delivery: " + str(delivery_time) + " | "
+    message += "Address: %s, %s %s | " % (str(package.delivery_address), str(package.delivery_city), str(package.delivery_zip))
     message += "Mileage of Truck 1: " + str(mileage1) + " | "
     message += "Mileage of Truck 2: " + str(mileage2) + " | "
     message += "Mileage of both Trucks: " + str(total_mileage) + " | "
@@ -522,9 +534,9 @@ def prompt_interactive_menu(hashTable, truck_list):
 
     # Display menu options
     print("Please select a menu option to generate a report or retrieve package information.\n")
-    print("\t 1. General Report")
-    print("\t 2. Package Query")
-    print("\t 3. Exit")
+    print("\t 1. General Report [ALL PACKAGES]")
+    print("\t 2. Package Query [INDIVIDUAL PACKAGE]")
+    print("\t 3. Exit Program")
     valid_options = [1, 2, 3]
 
     # Prompt the user for option selection:

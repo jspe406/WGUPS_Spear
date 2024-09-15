@@ -25,29 +25,95 @@ The supervisor should be able to see, at assigned points, the progress of each t
 ### A. Develop a hash table, without using any additional libraries or classes, that has an insertion function that takes the package ID as input and inserts each of the following data components into the hash table
 
 ### B.  Develop a look-up function that takes the package ID as input and returns each of the following corresponding data components:
-
+![Screenshot 2024-09-14 224532.png](screenshots%2FScreenshot%202024-09-14%20224532.png)
 ### C.  Write an original program that will deliver all packages and meet all requirements using the attached supporting documents “Salt Lake City Downtown Map,” “WGUPS Distance Table,” and “WGUPS Package File.”
 
+<br>
+<center>
+<img src="screenshots/Screenshot 2024-09-14 224830.png" style="width:75%">
+</center>
+<br>
+
 ### D.  Provide an intuitive interface for the user to view the delivery status (including the delivery time) of any package at any time and the total mileage traveled by all trucks. (The delivery status should report the package as at the hub, en route, or delivered. Delivery status must include the time.)
+***
+### Check at 9:00 AM
+<br>
+<center>
+<img src="screenshots/Screenshot 2024-09-14 221411.png" style="width:50%">
+</center>
+<br>
+
+***
+
+### Check at 10:00 AM
+<br>
+<center>
+<img src="screenshots/Screenshot 2024-09-14 221450.png" style="width:50%">
+</center>
+<br>
+
+***
+
+### Check at 12:30 PM
+<br>
+<center>
+<img src="screenshots/Screenshot 2024-09-14 221525.png" style="width:50%">
+</center>
+<br>
+
+***
 
 ### E.  Provide screenshots showing successful completion of the code that includes the total mileage traveled by all trucks.
-
+![Screenshot 2024-09-14 224924.png](screenshots%2FScreenshot%202024-09-14%20224924.png)
 ### F.  Justify the package delivery algorithm used in the solution as written in the original program by doing the following:
 1.  Describe two or more strengths of the algorithm used in the solution.
+```
+Two strengths from my algorithm are that it searches through all packages on the truck. Finds the closest package for each one assigned to the truck
+then compares the best from each package and chooses the best option to add to the truck. Then it will repeat the same process with the all packages on the truck,
+including the newly added until all spaces on truck are filled. Secondly it readjusts, if a package is manually added to the truck the algorithm can still run through
+the list and find the most optimal route.
+```
 
 2.  Verify that the algorithm used in the solution meets all requirements in the scenario.
+```
+3. All checks have been completed to meet all system requirements. All packages are delivered to the correct address, ontime and completed all the special notes.
+``` 
 
-3.  Identify two other named algorithms that are different from the algorithm implemented in the solution and would meet all requirements in the scenario.
-
-    -  Describe how both algorithms identified in part F3 are different from the algorithm used in the solution.
+4. Identify two other named algorithms that are different from the algorithm implemented in the solution and would meet all requirements in the scenario.
+```
+The Dijkstra algorithm and the Nearest neighbor algorithm
+```
+-  Describe how both algorithms identified in part F3 are different from the algorithm used in the solution.
+```
+The Dijkstra is used to find optimal ways on weighted paths. Our paths are not weighted based on time. We are only concerned with the mileage.
+The nearest neighbor algorithm is also a good option and similar to what I chose but differs in the way that it would choose the closest package regardless of if that package can be delivered at that given time or on a specific truck. My alogrithm will compare all closest elements for
+package on the truck and choose whichever is the best option at the given time based on the special notes and available packages.
+```
 
 ### G.  Describe what you would do differently, other than the two algorithms identified in part F3, if you did this project again, including details of the modifications that would be made.
+```
+If I were to attempt this again I would love to spend more time building out a more intuitive GUI that could present filters instead of just running query functions in the terminal
+```
 
 ### H.  Verify that the data structure used in the solution meets all requirements in the scenario.
+```
+All data requirements have been checked and verified. Hash Table is a clean and efficient way to store the data for the packages.
+```
 
 1.  Identify two other data structures that could meet the same requirements in the scenario.
+```
+Graph Nodes or a linked list would have also completed the task necessary to hold the data.
+```
 
-    - Describe how each data structure identified in H1 is different from the data structure used in the solution.
+- Describe how each data structure identified in H1 is different from the data structure used in the solution.
+```
+Graph nodes and linked lists are node-based structures which means they use pointers, while hash tables use an array-based structure with a hash function which is very useful.
+A graph node could be used to store data on the distances and addresses well so that you could implement a breadth or depth first aproach
+A linked list would be useful to hold the information but to hold the same data as the hash table, it would be best practice to use multiple linked lists to hold the data.
+
+Although both could get the job done a hash table is beest since it is the most efficient at key-value mapping.
+Graphs and linked lists require pointer-based traversal to aqquire data. The hash table wins in efficiency and simplifing complex data relationships
+```
 
 ### Sources:
 
