@@ -89,20 +89,6 @@ def set_package_priority(hashTable): #  priority is determined by the delivery d
             priority2.append(package.id_number)
         else: package.package_priority = 3, priority3.append(package.id_number)
 
-# Look up function to display all package information
-def package_lookup(hashTable, id):
-    id_number = int(id)
-    package = hashTable.lookup(id_number)
-
-    print("Package Info: \n"
-          "Package ID: " + str(package.id_number) + "\n"
-          "Delivery Deadline: " + str(package.delivery_deadline) + "\n"                                          
-          "Address: " + str(package.delivery_address) + "\n"
-          "City: " + str(package.delivery_city) + "\n"
-          "Zip: " + str(package.delivery_zip) + "\n"
-          "Weight: " + str(package.package_mass) + "\n"
-          "Status: " + str(package.delivery_status) + "\n"
-          "Delivery Time: ", package.time_of_delivery, "\n")
     
 def update_address(hashTable, id):
     self = hashTable.lookup(id)
@@ -110,10 +96,6 @@ def update_address(hashTable, id):
     self.delivery_city = 'Salt Lake City'
     self.delivery_state = 'UT'
     self.delivery_zip = '84111'
-
-def get_address(hashTalbe, id):
-    package = hashTalbe.lookup(id)
-    return package.delivery_address
 
 
 def load_distance_data():
@@ -143,7 +125,6 @@ def distance_table_loader():
 
     with open('distances.csv') as distances:
         reader = csv.reader(distances, delimiter = ',')
-
 
 
 # Returns a list of address data parsed from the 'addresses.csv' file
@@ -206,42 +187,6 @@ def find_distance(hashTable, id1, id2): # distance_between function that uses id
 
     distance = float(distance_between(current_address, checking_address))
     return distance
-
-def find_nearest_distance(hashTable, id): # returns the distance to the nearest package
-    current_package = hashTable.lookup(id)
-    current_package_id = current_package.id_number
-    current_address = current_package.delivery_address
-
-    next_address = None
-    next_address_distance = 50
-
-    for i in available_packages:
-        checking_id = hashTable.lookup(i)
-        checking_address = checking_id.delivery_address
-        if distance_between(current_address, checking_address) <= next_address_distance:
-            next_address = checking_address
-            next_address_distance = distance_between(current_address, checking_address)
-            next_address_id = checking_id.id_number
-    return float(next_address_distance)
-
-def find_nearest_package(hashTable, id): # returns the id number of the nearest package
-    current_package = hashTable.lookup(id)
-    current_package_id = current_package.id_number
-    current_address = current_package.delivery_address
-
-    next_address = None
-    next_address_distance = 50
-
-    for i in available_packages:
-        checking_id = hashTable.lookup(i)
-        checking_address = checking_id.delivery_address
-        if distance_between(current_address, checking_address) < next_address_distance:
-            next_address = checking_address
-            next_address_distance = distance_between(current_address, checking_address)
-            next_address_id = checking_id.id_number
-
-    return next_address_id
-
 
 # assigns and loads the packages onto the truck
 def fill_truck(hashTable, truck):
@@ -314,6 +259,9 @@ def truck_fill_remaining_spots(hashTable, truck, package_list): #loops through a
             truck.capacity = truck.capacity - 1            
 
 def sort_packages_on_truck(hashTable, truck):
+    '''Selection sort method used. It finds the package in the list that is closest to the Hub.
+    Then creates a new array and adds the package. Then finds the next closest package to the one that was previously added.
+    This process repeats until all packages from the unsorted list have been placed in the sorted list'''
     sorted_list = []
     starting_address = truck.hub_address
     unsorted_list = truck.assigned_packages.copy()
@@ -334,7 +282,7 @@ def sort_packages_on_truck(hashTable, truck):
                 next_package = i
 
         sorted_list.append(next_package)
-        if next_package in unsorted_list:
+        if next_package in unsorted_list: # removes from unsorted list
             unsorted_list.remove(next_package)
         starting_address = id_address_converter(hashTable, next_package)
         total_distance = round(total_distance + next_distance,1)
@@ -345,7 +293,7 @@ def sort_packages_on_truck(hashTable, truck):
     truck.assigned_packages = sorted_list
 
 
-def complete_route(hashTable, truck):
+def complete_route(hashTable, truck): # takes the loaded truck and delivers all packages in order on truck
     starting_address = truck.hub_address
     current_address = starting_address
     trip_mileage = 0
@@ -362,7 +310,7 @@ def complete_route(hashTable, truck):
         current_address = id_address_converter(hashTable, i)
 
         package.delivery_status = "Delivered"
-        if truck.start_time == timedelta(hours = 10, minutes = 7, seconds = 20):
+        if truck.start_time == timedelta(hours = 10, minutes = 7, seconds = 20): # for the second truck a different value was needed to track the time of delivery
             if truck.assigned_packages == [0]: current_address = truck.hub_address
             package.time_of_delivery = truck.start_time + truck.calculate_time(trip_mileage)
         else:
@@ -375,7 +323,9 @@ def complete_route(hashTable, truck):
         truck.capacity += 1
         truck.last_delivered = i
 
-'''
+        '''  
+        #leaving this in if needed for debugging because it was useful for tracking and finding errors.
+        
         print("Package: ", i, "\nStatus: ", package.delivery_status)
         print("Start Time: ", package.time_put_on_truck)
         print("At: ", package.time_of_delivery)
@@ -386,7 +336,7 @@ def complete_route(hashTable, truck):
         print("Truck : ", truck.id_number)
         print("Delivery Completed at ", package.time_of_delivery)
         print("-----------------------------------")
-'''
+        '''
 
 def return_to_hub(hashTable, truck):
         hub = truck.hub_address
@@ -409,8 +359,36 @@ def assign_remaining_packages(hashTable, truck):
     sort_packages_on_truck(hashTable, truck)
 
 
-def prepare_packages(hashTable):
+def prepare_trucks(): # sets start times for trucks
+    truck2.start_time = timedelta(hours=9, minutes=5)  # Truck 2 start time
+    truck2.time = truck2.start_time
+    truck1.start_time = timedelta(hours=8, minutes=0)
+    truck1.time = truck1.start_time
 
+
+def transform_time_data(hashTable): # changes time data to be able be used in other functions
+    for package in hashTable.package_table:
+        time = str(package.time_put_on_truck)
+        parsed_time = datetime.strptime(time, "%H:%M:%S").time()
+        package.time_put_on_truck = parsed_time
+
+        time = str(package.time_of_delivery)
+        parsed_time = datetime.strptime(time, "%H:%M:%S").time()
+        package.time_of_delivery = parsed_time
+
+
+def transform_truck_times(): #changes time format to be able to be used in other functions
+    # truck 1 start time
+    time = str(truck1.start_time)
+    parsed_time = datetime.strptime(time, "%H:%M:%S")
+    truck1.start_time = parsed_time
+    # truck 2 start time
+    time = str(truck2.start_time)
+    parsed_time = datetime.strptime(time, "%H:%M:%S")
+    truck2.start_time = parsed_time
+
+
+def prepare_packages(hashTable): # assigns packages to trucks based on the most optimal route and then sorts all packages.
     set_package_group(hashTable)
     set_package_priority(hashTable)
 
@@ -423,21 +401,19 @@ def prepare_packages(hashTable):
     sort_packages_on_truck(hashTable, truck1)
     sort_packages_on_truck(hashTable, truck2)
 
-def deliver_packages(hashTable):
 
+def deliver_packages(hashTable): # runs through to complete the routes and bring truck 1 back to the hub to deliver remaining packages
     complete_route(hashTable, truck1)
     complete_route(hashTable, truck2)
-    
-    
+
     return_to_hub(hashTable, truck1)
-    update_address(hashTable, 9) # truck 1 arrives back to hub at 10:37 so we can now update the address for package 9
+    update_address(hashTable, 9)  # truck 1 arrives back to hub at 10:37 so we can now update the address for package 9
     assign_remaining_packages(hashTable, truck1)
 
     complete_route(hashTable, truck1)
 
-    
 
-def prompt_time():
+def prompt_time(): # takes input from the user to pass to inquires for a time
     report_datetime = None
     # Prompt the user for a specified time
     while report_datetime is None:
@@ -449,17 +425,10 @@ def prompt_time():
 
     return report_datetime
 
-def test_package(hashTable, id):
-    report_datetime = prompt_time()
-    time = hashTable.package_table[id].time_put_on_truck
 
-    if report_datetime.time() > time:
-        print("Out for delivery or delivered")
-    else: print("At the Hub")
+def lookup_individual(hashTable):  # function to display data for any given package at any given time
 
-def lookup_individual(hashTable):
-
-    while True: # ensures that input form user is within the range of vaild ID numbers
+    while True:  # ensures that input form user is within the range of vaild ID numbers
         try:
             id = int(input("Please type the ID number of the package you would like to check (0-39): "))
             if 0 <= id <= 39:
@@ -472,13 +441,15 @@ def lookup_individual(hashTable):
     time = prompt_time()
     parsed_time = time.time()
     package = hashTable.package_table[id]
-    status =  package.delivery_status
+    status = package.delivery_status
     start = package.time_put_on_truck
     delivery_time = package.time_of_delivery
 
     mileage1 = truck1.time_to_mileage(time)
     mileage2 = truck2.time_to_mileage(time)
     total_mileage = mileage1 + mileage2
+
+    # assings a temporary status based on input time
 
     if parsed_time < start:
         status = "At the Hub"
@@ -496,15 +467,17 @@ def lookup_individual(hashTable):
     message += "Mileage of Truck 2: " + str(mileage2) + " | "
     message += "Mileage of both Trucks: " + str(total_mileage) + " | "
     print(message)
+
     input("Press 'ENTER' to continue")
     prompt_interactive_menu(hashTable, truck_list)
 
-def display_all_packages(hashTable):
+
+def display_all_packages(hashTable):  # displays all packages and status' at a given time
     time = prompt_time()
     parsed_time = time.time()
     check_time = datetime.strftime(time, "%I:%M %p")
 
-    for i in range(1,40):
+    for i in range(1, 40):  # sets a temporary status for status based on the time of inquiry
         package = hashTable.package_table[i]
         if parsed_time < package.time_put_on_truck:
             status = "At the Hub"
@@ -519,7 +492,8 @@ def display_all_packages(hashTable):
             package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
         print(package_info)
 
-    package = hashTable.package_table[0] # package at index 0 is ID 40. I didn't like it printing out starting with ID 40. so I removed it from the loop
+    package = hashTable.package_table[
+        0]  # package at index 0 is ID 40. I didn't like it printing out starting with ID 40. so I removed it from the loop
     if parsed_time < package.time_put_on_truck:
         status = "At the Hub"
     if parsed_time > package.time_put_on_truck and parsed_time < package.time_of_delivery:
@@ -533,38 +507,12 @@ def display_all_packages(hashTable):
         package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
     print(package_info)
 
-    print("Total Miles", (truck1.time_to_mileage(time) + truck2.time_to_mileage(time)))
+    print("Total Miles", (truck1.time_to_mileage(time) + truck2.time_to_mileage(time)))  # mileage of both trucks
     print("Checked at: ", check_time)
 
-    input("Press 'ENTER' to continue")
+    input("Press 'ENTER' to continue")  # creates a break after running the function before running the menu
     prompt_interactive_menu(hashTable, truck_list)
 
-
-def prepare_trucks():
-    truck2.start_time = timedelta(hours=9, minutes=5)  # Truck 2 start time
-    truck2.time = truck2.start_time
-    truck1.start_time = timedelta(hours=8, minutes=0)
-    truck1.time = truck1.start_time
-
-def transform_time_data(hashTable):
-    for package in hashTable.package_table:
-        time = str(package.time_put_on_truck)
-        parsed_time = datetime.strptime(time, "%H:%M:%S").time()
-        package.time_put_on_truck = parsed_time
-
-        time = str(package.time_of_delivery)
-        parsed_time = datetime.strptime(time, "%H:%M:%S").time()
-        package.time_of_delivery = parsed_time
-
-def transform_truck_times():
-    # truck 1 start time
-    time = str(truck1.start_time)
-    parsed_time = datetime.strptime(time, "%H:%M:%S")
-    truck1.start_time = parsed_time
-    # truck 2 start time
-    time = str(truck2.start_time)
-    parsed_time = datetime.strptime(time, "%H:%M:%S")
-    truck2.start_time = parsed_time
 
 def prompt_interactive_menu(hashTable, truck_list):
     # Display the title of the application
