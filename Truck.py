@@ -53,18 +53,6 @@ class Truck:
     def calculate_time(self, distance):
         return timedelta(minutes=(distance / self.speed * 60))
 
-# check to see if package is loaded onto truck
-    def check_for_packages(self, package_id):
-        if package_id in self.assigned_packages:
-            return True, print("Package is on Truck: %d" % self.id_number)
-        else: return False, print("Package is not on Truck: %d" % self.id_number)
-
-# display all the truck attributes
-    def display_truck_info(truck):
-        print("Truck ID: ", truck.id_number, "\n"
-              "Assigned [%d] Packages: " % len(truck.assigned_packages),truck.assigned_packages, "\n"
-              "Available Slots on Truck: ", truck.capacity, "\n"
-              "Driver Assigned to truck: ", truck.driver)
 
     def time_to_mileage(self, time):
         if self.id_number == 1 and time < datetime.strptime(str(timedelta(hours=8, minutes=0, seconds=0)), "%H:%M:%S"):
