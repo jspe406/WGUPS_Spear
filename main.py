@@ -441,8 +441,10 @@ def lookup_individual(hashTable):  # function to display data for any given pack
 
     while True:  # ensures that input form user is within the range of vaild ID numbers
         try:
-            id = int(input("Please type the ID number of the package you would like to check (0-39): "))
-            if 0 <= id <= 39:
+            id = int(input("Please type the ID number of the package you would like to check (1-40): "))
+            if 1 <= id <= 40:
+                if id == 40: # package with id 40 is at index 0 in the table
+                    id = 0
                 break
             else:
                 print("Invalid input. Please enter a number between 1 and 40.")
@@ -471,14 +473,23 @@ def lookup_individual(hashTable):  # function to display data for any given pack
     delivery_time = datetime.strptime(str(delivery_time), "%H:%M:%S")
     delivery_time = datetime.strftime(delivery_time, "%I:%M %p")
 
-    message = "\nPackage: " + str(id) + " | " + "Status: " + status + " | "
+    message = "\n[ Package: " + str(package.id_number) + " ]\n"
+    message += "----------------------------------------------" 
+    message += "\nStatus: " + status + "\n"
     if status == "Delivered":
-        message += "Time of Delivery: " + str(delivery_time) + " | "
-    message += "Address: %s, %s %s | " % (str(package.delivery_address), str(package.delivery_city), str(package.delivery_zip))
-    message += "Mileage of Truck 1: " + str(mileage1) + " | "
-    message += "Mileage of Truck 2: " + str(mileage2) + " | "
-    message += "Mileage of both Trucks: " + str(total_mileage) + " | "
-    print(message)
+        message += "Time of Delivery: " + str(delivery_time) + "\n"
+    message  += "Deadline: " + str(package.delivery_deadline) + "\n"
+    message += "Address: %s, %s %s \n" % (str(package.delivery_address), str(package.delivery_city), str(package.delivery_zip))
+    if status == 'At the Hub': truck = 'No Truck - At Hub'
+    elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
+        truck = "2"
+    else: truck = '1'
+    message += "Truck: " + str(truck) + "\n"
+    message += "----------------------------------------------"
+    message += "\nMileage of Truck 1: " + str(mileage1) + " | "
+    message += "Mileage of Truck 2: " + str(mileage2) + " |\n"
+    message += "Mileage of both Trucks: " + str(total_mileage)
+    print(message + "\n")
 
     input("Press 'ENTER' to continue")
     prompt_interactive_menu(hashTable, truck_list)
@@ -497,15 +508,24 @@ def display_all_packages(hashTable):  # displays all packages and status' at a g
             status = 'En Route'
         elif parsed_time > package.time_of_delivery:
             status = 'Delivered'
-
+        
         package_info = "Package: " + str(package.id_number) + " | "
         package_info += "Status: " + str(status) + " | "
         if status == "Delivered":
             package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
-        print(package_info)
+        else: package_info += "No delivery time | "
+        package_info += "Deadline: " + str(package.delivery_deadline) + " | "
+        package_info += "Address: " + str(package.delivery_address) + " | "
+        if status == "At the Hub": truck = "No Truck - Still at Hub"
+        elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
+            truck = "2"
+        else: truck = "1"
+        package_info += "Truck: " + str(truck)
 
-    package = hashTable.package_table[
-        0]  # package at index 0 is ID 40. I didn't like it printing out starting with ID 40. so I removed it from the loop
+        print(package_info)
+        print("-")
+
+    package = hashTable.package_table[0]  # package at index 0 is ID 40. I didn't like it printing out starting with ID 40. so I removed it from the loop
     if parsed_time < package.time_put_on_truck:
         status = "At the Hub"
     if parsed_time > package.time_put_on_truck and parsed_time < package.time_of_delivery:
@@ -517,7 +537,19 @@ def display_all_packages(hashTable):  # displays all packages and status' at a g
     package_info += "Status: " + str(status) + " | "
     if status == "Delivered":
         package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
+    else: package_info += "No delivery time | "
+    package_info += "Deadline: " + str(package.delivery_deadline) + " | "
+    package_info += "Address: " + str(package.delivery_address) + " | "
+    if status == "At the Hub":
+        truck = "No Truck - Still at Hub"
+    elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
+        truck = "2"
+    else: truck = "1"
+    package_info += "Truck: " + str(truck) + " | "
+
     print(package_info)
+    print("-")
+
 
     print("Total Miles", (truck1.time_to_mileage(time) + truck2.time_to_mileage(time)))  # mileage of both trucks
     print("Checked at: ", check_time)
@@ -554,7 +586,7 @@ def prompt_interactive_menu(hashTable, truck_list):
     if option == 1: display_all_packages(hashTable)
     if option == 2: lookup_individual(hashTable)
     if option == 3:
-        print("\nThank You. Program will now self-destruct.")
+        print("\nThank You. Program will now terminate session.")
         quit()
 
 def main(): # functions calling other functions to maintain clean code
