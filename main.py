@@ -479,7 +479,10 @@ def lookup_individual(hashTable):  # function to display data for any given pack
     if status == "Delivered":
         message += "Time of Delivery: " + str(delivery_time) + "\n"
     message  += "Deadline: " + str(package.delivery_deadline) + "\n"
-    message += "Address: %s, %s %s \n" % (str(package.delivery_address), str(package.delivery_city), str(package.delivery_zip))
+    if package.id_number == 9 and parsed_time < datetime.strptime(str(timedelta(hours=10, minutes=20, seconds=0)), '%H:%M:%S').time():
+        message += "Address 310 State St\n"
+    else:
+        message += "Address: %s, %s %s \n" % (str(package.delivery_address), str(package.delivery_city), str(package.delivery_zip))
     if status == 'At the Hub': truck = 'No Truck - At Hub'
     elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
         truck = "2"
@@ -515,7 +518,10 @@ def display_all_packages(hashTable):  # displays all packages and status' at a g
             package_info += "Time of Delivery: " + str(package.time_of_delivery) + " | "
         else: package_info += "No delivery time | "
         package_info += "Deadline: " + str(package.delivery_deadline) + " | "
-        package_info += "Address: " + str(package.delivery_address) + " | "
+        if package.id_number == 9 and parsed_time < datetime.strptime(str(timedelta(hours=10, minutes=20, seconds=0)), '%H:%M:%S').time():
+            package_info += "Address 310 State St | "
+        else:
+            package_info += "Address: " + str(package.delivery_address) + " | "
         if status == "At the Hub": truck = "No Truck - Still at Hub"
         elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
             truck = "2"
