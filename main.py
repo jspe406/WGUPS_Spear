@@ -480,7 +480,7 @@ def lookup_individual(hashTable):  # function to display data for any given pack
         message += "Time of Delivery: " + str(delivery_time) + "\n"
     message  += "Deadline: " + str(package.delivery_deadline) + "\n"
     if package.id_number == 9 and parsed_time < datetime.strptime(str(timedelta(hours=10, minutes=20, seconds=0)), '%H:%M:%S').time():
-        message += "Address 310 State St\n"
+        message += "Address 310 State St, Salt lake City, UT 84103\n"
     else:
         message += "Address: %s, %s %s \n" % (str(package.delivery_address), str(package.delivery_city), str(package.delivery_zip))
     if status == 'At the Hub': truck = 'No Truck - At Hub'
@@ -523,9 +523,10 @@ def display_all_packages(hashTable):  # displays all packages and status' at a g
         else:
             package_info += "Address: " + str(package.delivery_address) + " | "
         if status == "At the Hub": truck = "No Truck - Still at Hub"
-        elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
+        elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time():
             truck = "2"
-        else: truck = "1"
+        elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=8, minutes=0)),'%H:%M:%S').time() or package.time_put_on_truck == datetime.strptime(str(timedelta(hours=10, minutes=7, seconds=20)), '%H:%M:%S').time():
+            truck = "1"
         package_info += "Truck: " + str(truck)
 
         print(package_info)
@@ -548,9 +549,10 @@ def display_all_packages(hashTable):  # displays all packages and status' at a g
     package_info += "Address: " + str(package.delivery_address) + " | "
     if status == "At the Hub":
         truck = "No Truck - Still at Hub"
-    elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time() and status == "En Route":
+    elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=9, minutes=5)), '%H:%M:%S').time():
         truck = "2"
-    else: truck = "1"
+    elif package.time_put_on_truck == datetime.strptime(str(timedelta(hours=8, minutes=0)), '%H:%M:%S').time() or package.time_put_on_truck == datetime.strptime(str(timedelta(hours=10, minutes=7, seconds=20)), '%H:%M:%S').time():
+        truck = "1"
     package_info += "Truck: " + str(truck) + " | "
 
     print(package_info)
